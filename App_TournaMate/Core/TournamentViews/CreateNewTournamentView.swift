@@ -12,6 +12,7 @@ struct CreateNewTournamentView: View {
     @State private var pointsForTies = 1
     @State private var pointsForLosses = 0
     @State private var teams = [Team]()
+    @State private var teamName: String = ""
     @State private var isAddTeamViewPresented = false
     @State private var showingCreationAlert = false
     @State private var lastCreatedTeamId: String? = nil // This will now directly store the team ID when a team is successfully created
@@ -61,7 +62,7 @@ struct CreateNewTournamentView: View {
                         return
                     }
                     // Use the team ID to create the tournament and associate the team with it
-                    viewModel.createTournament(tournamentName: tournamentName, location: defaultLocation, teamName: "", teamID: teamId) { success in
+                    viewModel.createTournament(tournamentName: tournamentName, location: defaultLocation, teamName: self.teamName, teamID: teamId) { success in
                         if success {
                             showingCreationAlert = true
                         }
@@ -89,11 +90,12 @@ struct CreateNewTournamentView: View {
             .padding()
         }
         .sheet(isPresented: $isAddTeamViewPresented) {
-            AddTeamView(teams: $teams, isAddTeamViewPresented: $isAddTeamViewPresented, onTeamCreated: { teamId in
-                // Save the last created team ID for use in tournament creation
+            AddTeamView(teams: $teams, isAddTeamViewPresented: $isAddTeamViewPresented, onTeamCreated: { (teamId, teamNameReceived) in
                 self.lastCreatedTeamId = teamId
+                self.teamName = teamNameReceived // Make sure to have this State variable declared.
             })
         }
+
         .navigationTitle("Create New Tournament")
         .navigationBarItems(leading: Button("Dismiss") {
             presentationMode.wrappedValue.dismiss()

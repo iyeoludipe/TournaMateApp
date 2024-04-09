@@ -1,6 +1,7 @@
 import Foundation
 import Firebase
 import FirebaseFirestore
+import FirebaseAuth
 
 class TournamentViewModel: ObservableObject {
     @Published var tournaments: [Tournament] = []
@@ -57,12 +58,16 @@ class TournamentViewModel: ObservableObject {
                 return
             }
             
+            // Fetch the current user's email
+            let userEmail = Auth.auth().currentUser?.email ?? "unknown"
+            
             let tournamentData: [String: Any] = [
                 "tournament_name": tournamentName,
                 "unique_id": uniqueID,
                 "created_at": FieldValue.serverTimestamp(),
                 "metadata": ["location": location],
-                "team_names": [teamName] // Assuming this to be an array
+                "team_names": [teamName], // Assuming this to be an array
+                "participants": [userEmail]
             ]
             
             self.db.collection("tournaments").document(uniqueID).setData(tournamentData) { error in

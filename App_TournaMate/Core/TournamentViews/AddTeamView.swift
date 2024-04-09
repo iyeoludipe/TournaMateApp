@@ -1,15 +1,15 @@
 import SwiftUI
 import Firebase
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 struct AddTeamView: View {
     @Binding var teams: [Team]
     @Binding var isAddTeamViewPresented: Bool
-    var onTeamCreated: (String) -> Void
+    var onTeamCreated: ((String, String) -> Void)? // Adjusted for two parameters
     @Environment(\.presentationMode) var presentationMode
-    @State private var teamName = ""
-    @State private var players = 1 // Assuming the creator is the first player
-    
-    private let currentUserEmail = Auth.auth().currentUser?.email ?? "unknown@unknown.com"
+    @State private var teamName: String = ""
 
     var body: some View {
         NavigationView {
@@ -46,22 +46,24 @@ struct AddTeamView: View {
 
     func addTeam() {
         let db = Firestore.firestore()
-        let teamRef = db.collection("teams").document() // Corrected to properly initialize teamRef
-        // Preparing the team data with the creator as the first member
+        let teamRef = db.collection("teams").document()
+        guard let userEmail = Auth.auth().currentUser?.email else {
+            print("No logged in user found")
+            return
+        }
         let teamData: [String: Any] = [
             "team_name": teamName,
-            "members": [currentUserEmail],
+            "members": [userEmail],
             "created_at": FieldValue.serverTimestamp()
         ]
 
-        // Creating the team document in the Firestore database
         teamRef.setData(teamData) { error in
             if let error = error {
-                print("Error adding team: \(error)")
+                print("Error adding team: \(error.localizedDescription)")
             } else {
                 print("Team added with ID: \(teamRef.documentID)")
                 DispatchQueue.main.async {
-                    self.onTeamCreated(teamRef.documentID) // Callback to notify the team creation with its ID
+                    self.onTeamCreated?(teamRef.documentID, self.teamName) // Ensure to call it safely
                     self.presentationMode.wrappedValue.dismiss()
                 }
             }
@@ -71,7 +73,6 @@ struct AddTeamView: View {
 
 struct AddTeamView_Previews: PreviewProvider {
     static var previews: some View {
-        // Example usage
-        AddTeamView(teams: .constant([]), isAddTeamViewPresented: .constant(true), onTeamCreated: { _ in })
+        AddTeamView(teams: .constant([]), isAddTeamViewPresented: .constant(true), onTeamCreated: { _, _ in })
     }
 }
