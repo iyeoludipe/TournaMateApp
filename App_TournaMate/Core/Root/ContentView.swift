@@ -8,7 +8,7 @@ struct ContentView: View {
         NavigationView {
             Group {
                 if viewModel.userSession != nil {
-                    HomeView()
+                    HomeView(rootViewModel: RootViewModel())
                         .navigationBarBackButtonHidden(true) // Hide back button
                 } else {
                     LoginView()

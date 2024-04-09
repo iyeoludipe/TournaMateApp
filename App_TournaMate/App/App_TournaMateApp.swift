@@ -5,12 +5,18 @@ import FirebaseCore
 @main
 struct App_TournaMateApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject var viewModel = AuthViewModel()
-    
+    @StateObject var rootViewModel = RootViewModel()
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(viewModel)
+            WindowGroup {
+                NavigationView {
+                    if rootViewModel.showTabHomeView {
+                        TabHomeView()
+                    } else {
+                        HomeView(rootViewModel: RootViewModel())
+                            .environmentObject(rootViewModel)
+                    }
+                }
         }
     }
 }
