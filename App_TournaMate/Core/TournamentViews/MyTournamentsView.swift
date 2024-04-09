@@ -1,10 +1,19 @@
 import SwiftUI
 
 struct MyTournamentsView: View {
+    @ObservedObject var viewModel = TournamentViewModel()
+    @State private var myTournaments: [Tournament] = []
+
     var body: some View {
-        // Replace with actual content for the view
-        Text("This is the My Tournaments View")
-            .navigationBarTitle("My Tournaments", displayMode: .inline)
+        List(myTournaments, id: \.id) { tournament in
+            Text(tournament.name) // Assuming Tournament has a 'name' property
+        }
+        .navigationBarTitle("My Tournaments", displayMode: .inline)
+        .onAppear {
+            viewModel.fetchMyTournaments { tournaments in
+                self.myTournaments = tournaments
+            }
+        }
     }
 }
 

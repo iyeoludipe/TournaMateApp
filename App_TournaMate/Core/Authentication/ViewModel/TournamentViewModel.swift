@@ -11,19 +11,14 @@ class TournamentViewModel: ObservableObject {
         // Initialization code can go here
     }
 
-    // This function fetches the next tournament ID, increments it, and updates Firestore.
     func fetchNextTournamentID(completion: @escaping (String?) -> Void) {
         let tournamentIDRef = db.collection("counters").document("tournament_id")
-
         tournamentIDRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-                if let currentIDString = document.data()?["current_id"] as? String {
-                    let newIDString = String(format: "%05d", (Int(currentIDString) ?? 0) + 1)
-                    tournamentIDRef.updateData(["current_id": newIDString]) { err in
-                        completion(err == nil ? newIDString : nil)
-                    }
-                } else {
-                    completion(nil)
+            if let document = document, document.exists,
+               let currentIDString = document.data()?["current_id"] as? String {
+                let newIDString = String(format: "%05d", (Int(currentIDString) ?? 0) + 1)
+                tournamentIDRef.updateData(["current_id": newIDString]) { err in
+                    completion(err == nil ? newIDString : nil)
                 }
             } else {
                 print("Document does not exist or Error fetching document: \(String(describing: error))")
@@ -31,9 +26,9 @@ class TournamentViewModel: ObservableObject {
             }
         }
     }
-    
+
     func updateAllRecords(tournamentCode: String, teamID: String, completion: @escaping (Bool) -> Void) {
-        let teamRef = self.db.collection("teams").document(teamID)
+        let teamRef = db.collection("teams").document(teamID)
         teamRef.updateData([
             "tournament_id": tournamentCode
         ]) { error in
@@ -48,9 +43,48 @@ class TournamentViewModel: ObservableObject {
             }
         }
     }
+    
+    func fetchMyTournaments(completion: @escaping ([Tournament]) -> Void) {
+        guard let userEmail = Auth.auth().currentUser?.email else {
+            completion([])
+            return
+        }
+        
+        db.collection("users").document(userEmail).getDocument { (document, error) in
+            if let document = document, let data = document.data(), let tournamentCodes = data["tournaments"] as? [String] {
+                // Assuming each code is a unique_id in the tournaments collection
+                var tournaments: [Tournament] = []
+                let group = DispatchGroup()
+                
+                for code in tournamentCodes {
+                    group.enter()
+                    self.db.collection("tournaments").whereField("unique_id", isEqualTo: code).getDocuments { (querySnapshot, err) in
+                        // Inside the loop that fetches each tournament document
+                        if let err = err {
+                            print("Error getting documents: \(err)")
+                        } else if let querySnapshot = querySnapshot, !querySnapshot.documents.isEmpty {
+                            for document in querySnapshot.documents {
+                                if let tournament = Tournament(document: document) {
+                                    tournaments.append(tournament)
+                                }
+                            }
+                        }
+                        group.leave()
+
+                    }
+                }
+                
+                group.notify(queue: .main) {
+                    completion(tournaments)
+                }
+            } else {
+                print("Document does not exist or Error fetching document: \(String(describing: error))")
+                completion([])
+            }
+        }
+    }
 
 
-    // This function creates a new tournament with the provided details and updates the "counters" document.
     func createTournament(tournamentName: String, location: String, teamName: String, teamID: String, completion: @escaping (Bool) -> Void) {
         fetchNextTournamentID { [weak self] uniqueID in
             guard let self = self, let uniqueID = uniqueID else {
@@ -58,15 +92,13 @@ class TournamentViewModel: ObservableObject {
                 return
             }
             
-            // Fetch the current user's email
             let userEmail = Auth.auth().currentUser?.email ?? "unknown"
-            
             let tournamentData: [String: Any] = [
                 "tournament_name": tournamentName,
                 "unique_id": uniqueID,
                 "created_at": FieldValue.serverTimestamp(),
                 "metadata": ["location": location],
-                "team_names": [teamName], // Assuming this to be an array
+                "team_names": [teamName],
                 "participants": [userEmail]
             ]
             
@@ -82,5 +114,43 @@ class TournamentViewModel: ObservableObject {
             }
         }
     }
-
+    
+    func joinTournament(tournamentCode: String, completion: @escaping (Bool, String) -> Void) {
+        guard let userEmail = Auth.auth().currentUser?.email else {
+            completion(false, "User not logged in")
+            return
+        }
+        
+        let tournamentsRef = db.collection("tournaments").whereField("unique_id", isEqualTo: tournamentCode)
+        tournamentsRef.getDocuments { [weak self] (querySnapshot, error) in
+            guard let documents = querySnapshot?.documents, !documents.isEmpty,
+                  let document = documents.first else {
+                completion(false, "Tournament not found")
+                return
+            }
+            
+            let tournamentID = document.documentID
+            
+            // Add the user's email to the tournament's participants array
+            self?.db.collection("tournaments").document(tournamentID).updateData([
+                "participants": FieldValue.arrayUnion([userEmail])
+            ]) { error in
+                if let error = error {
+                    completion(false, "Failed to join tournament: \(error.localizedDescription)")
+                    return
+                }
+                
+                // Add the tournament code to the user's tournaments field
+                self?.db.collection("users").document(userEmail).updateData([
+                    "tournaments": FieldValue.arrayUnion([tournamentCode])
+                ]) { error in
+                    if let error = error {
+                        completion(false, "Failed to update user record: \(error.localizedDescription)")
+                    } else {
+                        completion(true, "Successfully joined the tournament")
+                    }
+                }
+            }
+        }
+    }
 }
