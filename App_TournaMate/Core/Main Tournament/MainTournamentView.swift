@@ -1,9 +1,10 @@
 import SwiftUI
 
 struct MainTournamentView: View {
+    let tabViewModel: TabViewModel
     var body: some View {
         TabView {
-            TabHomeView()
+            TabHomeView(viewModel: tabViewModel)
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
@@ -23,11 +24,5 @@ struct MainTournamentView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
-    }
-}
-
-struct MainTournamentView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainTournamentView()
     }
 }

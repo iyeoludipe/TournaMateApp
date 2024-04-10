@@ -5,6 +5,7 @@ import FirebaseAuth
 
 class TournamentViewModel: ObservableObject {
     @Published var tournaments: [Tournament] = []
+    @Published var selectedTournamentsUniqueID: String?
     private var db = Firestore.firestore()
 
     init() {
@@ -64,7 +65,7 @@ class TournamentViewModel: ObservableObject {
                             print("Error getting documents: \(err)")
                         } else if let querySnapshot = querySnapshot, !querySnapshot.documents.isEmpty {
                             for document in querySnapshot.documents {
-                                if let tournament = Tournament(document: document) {
+                                if let tournament = try? document.data(as: Tournament.self) {
                                     tournaments.append(tournament)
                                 }
                             }

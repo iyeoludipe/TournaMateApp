@@ -1,4 +1,8 @@
 import SwiftUI
+import Firebase
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 struct MyTournamentsView: View {
     @ObservedObject var viewModel = TournamentViewModel()
@@ -6,43 +10,35 @@ struct MyTournamentsView: View {
 
     var body: some View {
         ZStack {
-            Color.gray.opacity(0.1) // Light gray background for the whole view
+            Color.gray.opacity(0.1)
                 .edgesIgnoringSafeArea(.all)
 
             VStack {
                 List(myTournaments) { tournament in
-                    NavigationLink(destination: MainTournamentView()) {
+                    NavigationLink(destination: MainTournamentView(tabViewModel: TabViewModel(selectedTournamentID: tournament.uniqueID))) {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(tournament.name)
                                     .font(.headline)
-                                // Add more tournament details here if needed
                             }
                             Spacer()
                         }
                         .padding(.vertical, 8)
                         .padding(.horizontal, 16)
-                        .background(Color.white) // White background for each list item
+                        .background(Color.white)
                         .cornerRadius(10)
-                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2) // Softer shadow
+                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                     }
                 }
-                .listStyle(PlainListStyle()) // Removes extra padding and separators
+                .listStyle(PlainListStyle())
             }
-            .padding() // Padding around the list for spacing from screen edges
-            .navigationBarTitle("My Tournaments", displayMode: .large) // Add navigation bar title
+            .padding()
+            .navigationBarTitle("My Tournaments", displayMode: .large)
         }
         .onAppear {
             viewModel.fetchMyTournaments { tournaments in
                 self.myTournaments = tournaments
             }
         }
-    }
-}
-
-// Preview without NavigationView wrapper since it's already expected to be within one
-struct MyTournamentsView_Previews: PreviewProvider {
-    static var previews: some View {
-        MyTournamentsView()
     }
 }
