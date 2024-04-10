@@ -4,19 +4,25 @@ import FirebaseCore
 
 @main
 struct App_TournaMateApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var authViewModel = AuthViewModel() // Use AuthViewModel
     @StateObject var rootViewModel = RootViewModel()
 
+    init() {
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
-            WindowGroup {
-                NavigationView {
-                    if rootViewModel.showTabHomeView {
-                        TabHomeView()
-                    } else {
-                        HomeView(rootViewModel: RootViewModel())
-                            .environmentObject(rootViewModel)
-                    }
+        WindowGroup {
+            NavigationView {
+                if authViewModel.userSession != nil {
+                    HomeView(rootViewModel: rootViewModel) // User is logged in, show HomeView
+                        .environmentObject(authViewModel)
+                } else {
+                    LoginView() // No user is logged in, show LoginView
+                        .environmentObject(authViewModel)
                 }
+            }
         }
     }
 }
+

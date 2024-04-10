@@ -4,11 +4,7 @@ import Firebase
 import FirebaseFirestoreSwift
 import FirebaseFirestore
 
-protocol AuthenticationFormProtocol {
-    var formIsValid: Bool { get }
-}
-
-struct AuthError: Equatable {
+struct AuthError: Identifiable, Equatable {
     let message: String
     let id: UUID = UUID()
 
@@ -19,31 +15,47 @@ struct AuthError: Equatable {
 
 @MainActor
 class AuthViewModel: ObservableObject {
-    @Published var userSession: FirebaseAuth.User?
+    @Published var userSession: FirebaseAuth.User? = nil
+    private var handle: AuthStateDidChangeListenerHandle?
     @Published var currentUser: UserModel?
     @Published var authError: AuthError?
-    
+
     init() {
-        self.userSession = Auth.auth().currentUser
-        
-        Task {
-            await fetchUser()
+        handle = Auth.auth().addStateDidChangeListener { [weak self] (_, user) in
+            self?.userSession = user
+            if let user = user {
+                Task {
+                    await self?.fetchUser()
+                }
+            } else {
+                self?.currentUser = nil
+            }
         }
     }
     
+    deinit {
+        if let handle = handle {
+            Auth.auth().removeStateDidChangeListener(handle)
+        }
+    }
+    
+    func fetchUser() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let snapshot = try? await Firestore.firestore().collection("users").document(uid).getDocument() else { return }
+        self.currentUser = try? snapshot.data(as: UserModel.self)
+    }
+
     func signIn(withEmail email: String, password: String) async throws {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.userSession = result.user
-            self.authError = nil // Consider removing this if you reset `authError` elsewhere before calling signIn
+            self.authError = nil
             await fetchUser()
         } catch {
             print("DEBUG: Failed to login with \(error.localizedDescription)")
             self.authError = AuthError(message: "Failed to sign in. Please check your email and password and try again.")
-
         }
     }
-
     
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         do {
@@ -55,10 +67,7 @@ class AuthViewModel: ObservableObject {
             await fetchUser()
         } catch {
             print("DEBUG: Failed to create user \(error.localizedDescription)")
-            
         }
-        
-        
     }
     
     func sendPasswordReset(withEmail email: String, completion: @escaping (Bool, String?) -> Void) {
@@ -71,30 +80,22 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-
     
     var signOutCompletion: (() -> Void)?
     
     func signOut() {
         do {
-            try Auth.auth().signOut() // signs out user on backend
+            try Auth.auth().signOut()
             self.userSession = nil
             self.currentUser = nil
             
             signOutCompletion?()
-        } catch {
-            print("DEBUG: Failed to sign out with \(error.localizedDescription)")
+        } catch let signOutError as NSError {
+            print("Error signing out: %@", signOutError)
         }
     }
-    
+
     func deleteAccount() {
-        
-    }
-    
-    func fetchUser() async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        guard let snapshot = try? await Firestore.firestore().collection("users").document(uid).getDocument() else { return }
-        self.currentUser = try? snapshot.data(as: UserModel.self)
-        
+        // Implement account deletion logic here
     }
 }

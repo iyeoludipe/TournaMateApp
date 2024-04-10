@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ForgotPasswordView: View {
-    @EnvironmentObject var viewModel: AuthViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var email = ""
     @State private var showAlert = false
@@ -16,10 +16,12 @@ struct ForgotPasswordView: View {
                     .bold()
                     .padding(.bottom, 20)
 
-                InputView(text: $email, title: "Email Address", placeholder: "Enter your email")
-                
+                TextField("Email Address", text: $email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
                 Button(action: {
-                    viewModel.sendPasswordReset(withEmail: email) { success, errorMessage in
+                    authViewModel.sendPasswordReset(withEmail: email) { success, errorMessage in
                         if success {
                             alertTitle = "Success"
                             alertMessage = "A link to reset your password has been sent to your email."
@@ -39,15 +41,17 @@ struct ForgotPasswordView: View {
                 }
                 .padding(.top, 20)
                 .alert(isPresented: $showAlert) {
-                    Alert(title: Text("Check Your Email!"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
-                        self.presentationMode.wrappedValue.dismiss()
+                    Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
+                        if alertTitle == "Success" {
+                            self.presentationMode.wrappedValue.dismiss()
+                        }
                     })
                 }
                 
                 Spacer()
             }
             .padding()
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitle("Reset Password", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -61,6 +65,6 @@ struct ForgotPasswordView: View {
 
 struct ForgotPasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        ForgotPasswordView()
+        ForgotPasswordView().environmentObject(AuthViewModel())
     }
 }
