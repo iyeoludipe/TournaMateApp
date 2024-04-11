@@ -2,16 +2,14 @@ import FirebaseFirestoreSwift
 import Firebase
 
 struct Team: Identifiable, Codable {
-    var id: String
+    @DocumentID var id: String?
     var name: String
-    var players: Int
-    var teamStats: TeamStats  // Assuming you have a nested structure for stats
+    var teamStats: TeamStats
     
     enum CodingKeys: String, CodingKey {
         case id
-        case name
-        case players
-        case teamStats = "team_stats"  // The key in your Firestore document
+        case name = "team_name"  // The Firestore field for the team name seems to be 'team_name'
+        case teamStats = "team_stats"
     }
     
     struct TeamStats: Codable {
@@ -19,5 +17,12 @@ struct Team: Identifiable, Codable {
         var draws: Int
         var losses: Int
         var points: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case wins
+            case draws
+            case losses
+            case points = "pts"
+        }
     }
 }

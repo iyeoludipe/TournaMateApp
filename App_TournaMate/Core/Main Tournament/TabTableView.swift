@@ -5,14 +5,14 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 
 struct TabTableView: View {
-    @ObservedObject var viewModel = TabViewModel() // This is the correct line
+    @ObservedObject var viewModel: TableViewModel // This is correctly passed from the parent view
 
     var body: some View {
         VStack {
             Text("League Standings")
                 .font(.title)
                 .padding()
-            
+
             HStack {
                 Text("Pos")
                     .frame(width: 30, alignment: .leading)
@@ -34,10 +34,14 @@ struct TabTableView: View {
             }
             .font(.headline)
             .padding(.horizontal)
-            
-            List(viewModel.teams) { team in
+
+            // Dynamically display teams with their statistics
+            List(viewModel.teams.indices, id: \.self) { index in
+                let team = viewModel.teams[index]
                 HStack {
-                    Text("\(team.name)")
+                    Text("\(index + 1)") // Position based on the list index
+                        .frame(width: 30, alignment: .leading)
+                    Text(team.name)
                         .frame(width: 140, alignment: .leading)
                     Spacer()
                     Text("\(team.teamStats.wins)")
@@ -56,16 +60,10 @@ struct TabTableView: View {
             }
         }
         .onAppear {
-            viewModel.fetchTeams()
+            // This should ideally be triggered with the actual selected tournamentID
+            // For now, using a hardcoded value for demonstration
+            viewModel.fetchTeamsForTournament(tournamentID: "00001")
         }
         .navigationBarTitle("League Table", displayMode: .inline)
-    }
-}
-
-struct TabTableView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            TabTableView(viewModel: TabViewModel())
-        }
     }
 }

@@ -47,43 +47,53 @@ class TournamentViewModel: ObservableObject {
     
     func fetchMyTournaments(completion: @escaping ([Tournament]) -> Void) {
         guard let userEmail = Auth.auth().currentUser?.email else {
+            print("User not logged in or email unavailable")
             completion([])
             return
         }
         
         db.collection("users").document(userEmail).getDocument { (document, error) in
-            if let document = document, let data = document.data(), let tournamentCodes = data["tournaments"] as? [String] {
-                // Assuming each code is a unique_id in the tournaments collection
-                var tournaments: [Tournament] = []
-                let group = DispatchGroup()
-                
-                for code in tournamentCodes {
-                    group.enter()
-                    self.db.collection("tournaments").whereField("unique_id", isEqualTo: code).getDocuments { (querySnapshot, err) in
-                        // Inside the loop that fetches each tournament document
-                        if let err = err {
-                            print("Error getting documents: \(err)")
-                        } else if let querySnapshot = querySnapshot, !querySnapshot.documents.isEmpty {
-                            for document in querySnapshot.documents {
-                                if let tournament = try? document.data(as: Tournament.self) {
-                                    tournaments.append(tournament)
-                                }
+            if let error = error {
+                print("Error fetching user document: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let document = document, document.exists, let data = document.data(),
+                  let tournamentCodes = data["tournaments"] as? [String], !tournamentCodes.isEmpty else {
+                print("No tournaments found for user or error fetching document")
+                completion([])
+                return
+            }
+            
+            var tournaments: [Tournament] = []
+            let group = DispatchGroup()
+            
+            for code in tournamentCodes {
+                group.enter()
+                self.db.collection("tournaments").whereField("unique_id", isEqualTo: code).getDocuments { (querySnapshot, err) in
+                    if let err = err {
+                        print("Error getting tournament documents: \(err.localizedDescription)")
+                    } else if let querySnapshot = querySnapshot, !querySnapshot.documents.isEmpty {
+                        for document in querySnapshot.documents {
+                            do {
+                                let tournament = try document.data(as: Tournament.self)
+                                tournaments.append(tournament)
+                            } catch let decodeError {
+                                print("Error decoding tournament: \(decodeError)")
                             }
                         }
-                        group.leave()
-
                     }
+                    group.leave()
                 }
-                
-                group.notify(queue: .main) {
-                    completion(tournaments)
-                }
-            } else {
-                print("Document does not exist or Error fetching document: \(String(describing: error))")
-                completion([])
+            }
+            
+            group.notify(queue: .main) {
+                completion(tournaments)
             }
         }
     }
+
 
 
     func createTournament(tournamentName: String, location: String, teamName: String, teamID: String, completion: @escaping (Bool) -> Void) {

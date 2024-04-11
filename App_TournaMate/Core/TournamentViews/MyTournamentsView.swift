@@ -15,7 +15,7 @@ struct MyTournamentsView: View {
 
             VStack {
                 List(myTournaments) { tournament in
-                    NavigationLink(destination: MainTournamentView(tabViewModel: TabViewModel(selectedTournamentID: tournament.uniqueID))) {
+                    NavigationLink(destination: MainTournamentView(tabViewModel: TabViewModel(selectedTournamentID: tournament.uniqueID), tableViewModel: TableViewModel())) {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(tournament.name)

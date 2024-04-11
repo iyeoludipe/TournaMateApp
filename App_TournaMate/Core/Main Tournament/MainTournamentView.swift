@@ -1,7 +1,13 @@
 import SwiftUI
 
 struct MainTournamentView: View {
-    let tabViewModel: TabViewModel
+    var tabViewModel: TabViewModel
+    var tableViewModel: TableViewModel
+    
+    init(tabViewModel: TabViewModel, tableViewModel: TableViewModel) {
+        self.tabViewModel = tabViewModel
+        self.tableViewModel = tableViewModel
+    }
     var body: some View {
         TabView {
             TabHomeView(viewModel: tabViewModel)
@@ -14,7 +20,7 @@ struct MainTournamentView: View {
                     Label("Fixtures", systemImage: "calendar")
                 }
             
-            TabTableView()
+            TabTableView(viewModel: tableViewModel)
                 .tabItem {
                     Label("Table", systemImage: "tablecells")
                 }
