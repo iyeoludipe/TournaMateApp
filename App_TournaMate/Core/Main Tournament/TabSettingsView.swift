@@ -3,93 +3,73 @@ import SwiftUI
 struct TabSettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var tabViewModel: TabViewModel
-    let userFullName = "John Doe"
-    let userEmail = "john@example.com"
-    let appVersion = "1.0.0" // This should be fetched dynamically in your app
-
+    @StateObject var settingsViewModel: SettingsViewModel
+    
+    var appVersion = "1.0.0" // Ideally, fetched dynamically
+    
     var body: some View {
-        List {
-            Section {
-                HStack {
-                    Text("JD") // Placeholder for user initials
-                        .font(.title)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(width: 72, height: 72)
-                        .background(Color(.systemGray3))
-                        .clipShape(Circle())
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(userFullName)
-                            .font(.subheadline)
+        NavigationView {
+            List {
+                Section {
+                    HStack {
+                        Text(settingsViewModel.userInitials) // Use initials from settingsViewModel
+                            .font(.title)
                             .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(width: 72, height: 72)
+                            .background(Color(.systemGray3))
+                            .clipShape(Circle())
                         
-                        Text(userEmail)
-                            .font(.footnote)
-                            .foregroundColor(.gray)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(settingsViewModel.userFullName) // Full name from settingsViewModel
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            
+                            Text(settingsViewModel.userEmail) // Email from settingsViewModel
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                        }
                     }
                 }
+                
+                // General Section
+                Section(header: Text("General")) {
+                    SettingsRowView(imageName: "gear", title: "Version \(appVersion)", tintColor: Color(.systemGray))
+                }
+                
+                // Tournaments Section
+                Section(header: Text("Tournaments")) {
+                    NavigationLink("Manage Fixtures", destination: ManageFixturesView())
+                    NavigationLink("Manage Teams", destination: ManageteamsView())
+                    
+                    Button("Invite To TournaMate") {
+                        // Action for Row3
+                    }
+                }
+                
+                // Account Section
+                Section(header: Text("Account")) {
+                    Button("Sign Out") {
+                        // Sign out action
+                    }
+                    .foregroundColor(.red)
+                    
+                    Button("Reset Password") {
+                        // Reset Password action
+                    }
+                    .foregroundColor(.red)
+                    
+                    Button("Delete Account") {
+                        // Delete Account action
+                    }
+                    .foregroundColor(.red)
+                }
             }
-            
-            Section(header: Text("General")) {
-                SettingsRowView(imageName: "gear", title: "Version \(appVersion)", tintColor: Color(.systemGray))
-            }
-            
-            Section(header: Text("Tournaments")) {
-                Button(action: {
-                    // Placeholder for row1 action
-                    Text("Action")
-                }) {
-                    Text("Row1")
-                }
-                
-                Button(action: {
-                    // Placeholder for row2 action
-                    Text("Action")
-                }) {
-                    Text("Row2")
-                }
-            
-                
-                Button(action: {
-                    // Placeholder for row3 action
-                    Text("Action")
-                }) {
-                    Text("Row3")
-                }
-                
-            }
-            
-            Section(header: Text("Account")) {
-                Button(action: {
-                    print("Signed out")
-                }) {
-                    SettingsRowView(imageName: "arrow.left.circle.fill", title: "Sign Out", tintColor: .red)
-                }
-                
-                Button(action: {
-                    // Placeholder for delete account action
-                    Text("Password Reset")
-                }) {
-                    SettingsRowView(imageName: "arrow.clockwise.circle.fill", title: "Reset Password", tintColor: .red)
-                }
-                
-                Button(action: {
-                    // Placeholder for delete account action
-                    Text("Confirm you want to delete your account")
-                }) {
-                    SettingsRowView(imageName: "xmark.circle.fill", title: "Delete Account", tintColor: .red)
-                }
+            .listStyle(GroupedListStyle())
+            .navigationBarTitle("Settings")
+            .onAppear {
+                settingsViewModel.fetchCurrentUserDetails() // Fetch user details when view appears
             }
         }
-        .listStyle(GroupedListStyle())
-        .navigationBarTitle("Settings")
-        }
-    }
-
-
-struct TabSettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabSettingsView().environmentObject(TabViewModel())
     }
 }

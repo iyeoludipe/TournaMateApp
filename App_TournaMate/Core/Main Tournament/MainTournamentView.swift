@@ -3,10 +3,12 @@ import SwiftUI
 struct MainTournamentView: View {
     var tabViewModel: TabViewModel
     var tableViewModel: TableViewModel
+    var settingsViewModel: SettingsViewModel
     
-    init(tabViewModel: TabViewModel, tableViewModel: TableViewModel) {
+    init(tabViewModel: TabViewModel, tableViewModel: TableViewModel, settingsViewModel: SettingsViewModel) {
         self.tabViewModel = tabViewModel
         self.tableViewModel = tableViewModel
+        self.settingsViewModel = settingsViewModel
     }
     var body: some View {
         TabView {
@@ -25,7 +27,7 @@ struct MainTournamentView: View {
                     Label("Table", systemImage: "tablecells")
                 }
             
-            TabSettingsView()
+            TabSettingsView(settingsViewModel: settingsViewModel)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
