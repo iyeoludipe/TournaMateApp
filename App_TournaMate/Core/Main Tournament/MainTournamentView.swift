@@ -9,7 +9,7 @@ struct MainTournamentView: View {
                     Label("Home", systemImage: "house")
                 }
             
-            TabFixturesView()
+            TabFixturesView(viewModel: tabViewModel)
                 .tabItem {
                     Label("Fixtures", systemImage: "calendar")
                 }

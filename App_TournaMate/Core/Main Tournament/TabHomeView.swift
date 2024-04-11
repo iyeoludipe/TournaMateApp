@@ -39,7 +39,11 @@ struct TabHomeView: View {
         }
         .navigationBarTitle("Home", displayMode: .inline) // Set the navigation bar title
         .onAppear {
-            viewModel.getCurrentTournamentInfo()
+            if let tournamentID = viewModel.selectedTournamentUniqueID {
+                viewModel.getCurrentTournamentInfo(tournamentID: tournamentID)
+            } else {
+                print("Tournament ID not set")
+            }
         }
     }
 }
@@ -60,13 +64,5 @@ struct SectionView: View {
         .background(Color.white)
         .cornerRadius(8)
         .shadow(radius: 2)
-    }
-}
-
-struct TabHomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            TabHomeView(viewModel: TabViewModel()) // Ensure TabViewModel is initialized here for previews
-        }
     }
 }
