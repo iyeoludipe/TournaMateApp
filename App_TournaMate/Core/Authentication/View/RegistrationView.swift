@@ -8,7 +8,7 @@ struct RegistrationView: View {
     @State private var validationError = ""
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var viewModel: AuthViewModel
-
+    
     var body: some View {
         VStack {
             Image("TournaMateLogo")
@@ -25,13 +25,7 @@ struct RegistrationView: View {
                 
                 InputView(text: $password, title: "Password", placeholder: "Enter Your Password", isSecureField: true)
                 
-                ZStack(alignment: .trailing) {
-                    InputView(text: $confirmPassword, title: "Confirm Password", placeholder: "Confirm Your Password", isSecureField: true)
-                    
-                    Image(systemName: password == confirmPassword && !password.isEmpty ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .imageScale(.large)
-                        .foregroundColor(password == confirmPassword && !password.isEmpty ? .green : .red)
-                }
+                InputView(text: $confirmPassword, title: "Confirm Password", placeholder: "Confirm Your Password", isSecureField: true)
             }
             .padding(.horizontal)
             .padding(.top, 12)
@@ -41,7 +35,11 @@ struct RegistrationView: View {
                 .font(.caption)
                 .padding(.bottom, 5)
             
-            Button(action: signUpAction) {
+            Button(action: {
+                Task {
+                    await signUpAction()
+                }
+            }) {
                 HStack {
                     Text("SIGN UP")
                         .fontWeight(.semibold)
@@ -67,32 +65,45 @@ struct RegistrationView: View {
             }
         }
         .padding()
+        .onChange(of: email) { _ in validateFields() }
+        .onChange(of: fullname) { _ in validateFields() }
+        .onChange(of: password) { _ in validateFields() }
+        .onChange(of: confirmPassword) { _ in validateFields() }
     }
     
     var formIsValid: Bool {
-        let isValidEmail = email.contains("@")
-        let isValidFullName = fullname.split(separator: " ").count >= 2 && fullname.split(separator: " ").allSatisfy { $0.count >= 2 }
-        let isValidPassword = password.count >= 6 && password.range(of: "[A-Z]", options: .regularExpression) != nil && password.range(of: "\\d", options: .regularExpression) != nil
-        let passwordsMatch = password == confirmPassword
-        
-        // Update validation error message
-        if !isValidEmail { validationError = "Email must contain an '@'." }
-        else if !isValidFullName { validationError = "Full name must be at least 2 words, each 2 characters long." }
-        else if !isValidPassword { validationError = "Password must be at least 6 characters long, contain a number and an uppercase letter." }
-        else if !passwordsMatch { validationError = "Passwords do not match." }
-        else { validationError = "" } // Clear error message if everything is valid
-        
-        return isValidEmail && isValidFullName && isValidPassword && passwordsMatch
+        email.contains("@") &&
+        fullname.split(separator: " ").count >= 2 &&
+        password.count >= 6 &&
+        password.range(of: "[A-Z]", options: .regularExpression) != nil &&
+        password.range(of: "\\d", options: .regularExpression) != nil &&
+        password == confirmPassword
     }
     
-    func signUpAction() {
-        // Perform sign-up action
-        // Check for existing user and show alert if necessary
-    }
-}
-
-struct RegistrationView_Previews: PreviewProvider {
-    static var previews: some View {
-        RegistrationView().environmentObject(AuthViewModel())
+    func signUpAction() async {
+            if formIsValid {
+                do {
+                    try await viewModel.createUser(withEmail: email, password: password, fullname: fullname)
+                    // Handle successful sign up, navigate or update UI accordingly
+                    print("User created successfully")
+                } catch {
+                    // If createUser throws an error, handle it here
+                    print("Failed to create user: \(error.localizedDescription)")
+                }
+            } else {
+                print("Form is not valid")
+            }
+        }
+    
+    private func validateFields() {
+        var errors = [String]()
+        if !email.contains("@") { errors.append("Email must contain an '@'.") }
+        if fullname.split(separator: " ").count < 2 { errors.append("Full name must be at least 2 words.") }
+        if password.count < 6 { errors.append("Password must be at least 6 characters.") }
+        if password.range(of: "[A-Z]", options: .regularExpression) == nil { errors.append("Password must contain an uppercase letter.") }
+        if password.range(of: "\\d", options: .regularExpression) == nil { errors.append("Password must contain a number.") }
+        if password != confirmPassword { errors.append("Passwords do not match.") }
+        
+        validationError = errors.joined(separator: " ")
     }
 }

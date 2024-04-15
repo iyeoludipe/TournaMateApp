@@ -44,9 +44,3 @@ extension Fixture: Identifiable {
         return formatter.string(from: date)
     }
 }
-
-struct TabFixturesView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabFixturesView(viewModel: TabViewModel())
-    }
-}

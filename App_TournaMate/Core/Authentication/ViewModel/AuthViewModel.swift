@@ -59,16 +59,30 @@ class AuthViewModel: ObservableObject {
     
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         do {
+            // Create the user with email and password
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
-            let user = UserModel(id: result.user.uid, fullname: fullname, email: email)
-            let encodedUser = try Firestore.Encoder().encode(user)
-            try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
+            
+            // Prepare the user data for Firestore
+            let userData: [String: Any] = [
+                "email": email,
+                "full_name": fullname,
+                "is_admin": false,
+                "teams_joined": [String](),
+                "tournaments": [String]()
+            ]
+            
+            // Set the user data in Firestore using the email as the document ID
+            try await Firestore.firestore().collection("users").document(email).setData(userData)
+            
+            // Fetch the current user data to update the local state
             await fetchUser()
         } catch {
             print("DEBUG: Failed to create user \(error.localizedDescription)")
+            throw error  // Rethrow the error to be handled by the caller if needed
         }
     }
+
     
     func sendPasswordReset(withEmail email: String, completion: @escaping (Bool, String?) -> Void) {
         Auth.auth().sendPasswordReset(withEmail: email) { error in
@@ -95,7 +109,17 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func deleteAccount() {
-        // Implement account deletion logic here
+    func deleteAccount(completion: @escaping(Bool, String) -> Void) {
+        let user = Auth.auth().currentUser
+        user?.delete { error in
+            if let error = error {
+                //An error
+                completion(false, error.localizedDescription)
+            } else {
+                // Account deleted
+                self.userSession = nil
+                completion(true, "Account successfully deleted")
+            }
+        }
     }
 }

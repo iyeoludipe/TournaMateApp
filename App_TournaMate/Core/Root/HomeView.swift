@@ -3,7 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var isAccountViewPresented = false
     @State private var showingCreateTournamentView = false
-    var rootViewModel: RootViewModel
+    @EnvironmentObject var tabViewModdel: TabViewModel
 
     var body: some View {
         VStack {
@@ -59,13 +59,5 @@ struct HomeButtonView: View {
             .background(color)
             .cornerRadius(10)
             .shadow(radius: 5)
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            HomeView(rootViewModel: RootViewModel())
-        }
     }
 }

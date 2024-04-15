@@ -1,18 +1,19 @@
 import SwiftUI
 
 struct TabSettingsView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var viewModel: AuthViewModel
     @EnvironmentObject var tabViewModel: TabViewModel
     @StateObject var settingsViewModel: SettingsViewModel
+    @State private var showingShareSheet = false
     
-    var appVersion = "1.0.0" // Ideally, fetched dynamically
+    var appVersion = "1.0.0"  // Ideally, fetched dynamically
     
     var body: some View {
         NavigationView {
             List {
                 Section {
                     HStack {
-                        Text(settingsViewModel.userInitials) // Use initials from settingsViewModel
+                        Text(settingsViewModel.userInitials)
                             .font(.title)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -21,11 +22,11 @@ struct TabSettingsView: View {
                             .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(settingsViewModel.userFullName) // Full name from settingsViewModel
+                            Text(settingsViewModel.userFullName)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                             
-                            Text(settingsViewModel.userEmail) // Email from settingsViewModel
+                            Text(settingsViewModel.userEmail)
                                 .font(.footnote)
                                 .foregroundColor(.gray)
                         }
@@ -39,36 +40,22 @@ struct TabSettingsView: View {
                 
                 // Tournaments Section
                 Section(header: Text("Tournaments")) {
-                    NavigationLink("Manage Fixtures", destination: ManageFixturesView())
-                    NavigationLink("Manage Teams", destination: ManageteamsView())
+                    NavigationLink("Manage Fixtures", destination: ManageFixturesView().environmentObject(tabViewModel))
+                    NavigationLink("Manage Teams", destination: ManageTeamsView().environmentObject(tabViewModel))
                     
                     Button("Invite To TournaMate") {
-                        // Action for Row3
+                        showingShareSheet = true
                     }
                 }
-                
-                // Account Section
-                Section(header: Text("Account")) {
-                    Button("Sign Out") {
-                        // Sign out action
-                    }
-                    .foregroundColor(.red)
-                    
-                    Button("Reset Password") {
-                        // Reset Password action
-                    }
-                    .foregroundColor(.red)
-                    
-                    Button("Delete Account") {
-                        // Delete Account action
-                    }
-                    .foregroundColor(.red)
-                }
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                ActivityView(activityItems: ["Join TournaMate: <URL to download app>"], applicationActivities: nil)
             }
             .listStyle(GroupedListStyle())
             .navigationBarTitle("Settings")
             .onAppear {
-                settingsViewModel.fetchCurrentUserDetails() // Fetch user details when view appears
+                settingsViewModel.fetchCurrentUserDetails()
+                
             }
         }
     }

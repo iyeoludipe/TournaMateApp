@@ -4,8 +4,8 @@ import FirebaseCore
 
 @main
 struct App_TournaMateApp: App {
-    @StateObject var authViewModel = AuthViewModel() // Use AuthViewModel
-    @StateObject var rootViewModel = RootViewModel()
+    @StateObject var authViewModel = AuthViewModel() // Correct instantiation
+    @StateObject var tabViewModel = TabViewModel()   // Make sure it's instantiated like this
 
     init() {
         FirebaseApp.configure()
@@ -15,14 +15,14 @@ struct App_TournaMateApp: App {
         WindowGroup {
             NavigationView {
                 if authViewModel.userSession != nil {
-                    HomeView(rootViewModel: rootViewModel) // User is logged in, show HomeView
+                    HomeView()
                         .environmentObject(authViewModel)
+                        .environmentObject(tabViewModel) // Pass the instance, not the type
                 } else {
-                    LoginView() // No user is logged in, show LoginView
+                    LoginView()
                         .environmentObject(authViewModel)
                 }
             }
         }
     }
 }
-

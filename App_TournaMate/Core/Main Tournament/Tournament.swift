@@ -7,11 +7,13 @@ struct Fixture: Codable, Comparable {
     var teamA: String
     var teamB: String
 
+
     // Allows sorting of fixtures by date
     static func < (lhs: Fixture, rhs: Fixture) -> Bool {
         return lhs.date < rhs.date
     }
 }
+
 
 struct Tournament: Identifiable, Codable {
     @DocumentID var id: String?
