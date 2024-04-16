@@ -6,9 +6,22 @@ class SettingsViewModel: ObservableObject {
     @Published var userFullName: String = ""
     @Published var userEmail: String = ""
     @Published var userInitials: String = ""
+    @Published var teamCode: String = ""
 
     private var db = Firestore.firestore()
 
+    func fetchTeamCode(teamID: String) {
+            let db = Firestore.firestore()
+            let teamRef = db.collection("teams").document(teamID)
+            teamRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    self.teamCode = document.data()?["team_id"] as? String ?? "No Code"
+                } else {
+                    print("Document does not exist")
+                }
+            }
+        }
+    
     func fetchCurrentUserDetails() {
         guard let userEmail = Auth.auth().currentUser?.email else {
             print("No user logged in")

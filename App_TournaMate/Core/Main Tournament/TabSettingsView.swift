@@ -36,6 +36,15 @@ struct TabSettingsView: View {
                 // General Section
                 Section(header: Text("General")) {
                     SettingsRowView(imageName: "gear", title: "Version \(appVersion)", tintColor: Color(.systemGray))
+                    HStack {
+                        Text("Team Code")
+                        Spacer()
+                        Text(settingsViewModel.teamCode)  // Assumes `teamCode` is fetched and stored in `settingsViewModel`
+                            .foregroundColor(.gray)
+                            .onTapGesture {
+                                UIPasteboard.general.string = settingsViewModel.teamCode
+                            }
+                    }
                 }
                 
                 // Tournaments Section
@@ -54,8 +63,7 @@ struct TabSettingsView: View {
             .listStyle(GroupedListStyle())
             .navigationBarTitle("Settings")
             .onAppear {
-                settingsViewModel.fetchCurrentUserDetails()
-                
+                settingsViewModel.fetchCurrentUserDetails()  // Ensure it includes the team code fetch
             }
         }
     }
