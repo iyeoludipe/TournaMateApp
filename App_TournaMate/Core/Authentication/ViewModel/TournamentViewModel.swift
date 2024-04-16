@@ -11,6 +11,26 @@ class TournamentViewModel: ObservableObject {
     init() {
         // Initialization code can go here
     }
+    
+    func addFixture(toTournament tournamentID: String, teamA: String, teamB: String, date: Timestamp, completion: @escaping (Bool, String) -> Void) {
+            let newFixture: [String: Any] = [
+                "date": date,
+                "teamA": teamA,
+                "teamB": teamB
+            ]
+            
+            let tournamentRef = db.collection("tournaments").document(tournamentID)
+            
+            tournamentRef.updateData([
+                "fixtures": FieldValue.arrayUnion([newFixture])
+            ]) { error in
+                if let error = error {
+                    completion(false, "Error adding fixture: \(error.localizedDescription)")
+                } else {
+                    completion(true, "Fixture added successfully")
+                }
+            }
+        }
 
     func fetchNextTournamentID(completion: @escaping (String?) -> Void) {
         let tournamentIDRef = db.collection("counters").document("tournament_id")

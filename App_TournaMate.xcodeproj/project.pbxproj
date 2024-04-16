@@ -28,6 +28,7 @@
 		8B66447B2BCC6CDD00423B22 /* FixtureRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447A2BCC6CDD00423B22 /* FixtureRowView.swift */; };
 		8B66447D2BCD268800423B22 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447C2BCD268800423B22 /* ActivityView.swift */; };
 		8B66447F2BCD93BC00423B22 /* JoinTeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447E2BCD93BC00423B22 /* JoinTeamView.swift */; };
+		8B6644812BCEDB5300423B22 /* AddFixtureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6644802BCEDB5200423B22 /* AddFixtureView.swift */; };
 		8B6FB08B2BC0810200C66C05 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6FB08A2BC0810200C66C05 /* FirebaseAppCheck */; };
 		8B6FB08D2BC0810200C66C05 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6FB08C2BC0810200C66C05 /* FirebaseAuthCombine-Community */; };
 		8B6FB08F2BC081A300C66C05 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6FB08E2BC081A300C66C05 /* AppDelegate.swift */; };
@@ -75,6 +76,7 @@
 		8B66447A2BCC6CDD00423B22 /* FixtureRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureRowView.swift; sourceTree = "<group>"; };
 		8B66447C2BCD268800423B22 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		8B66447E2BCD93BC00423B22 /* JoinTeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinTeamView.swift; sourceTree = "<group>"; };
+		8B6644802BCEDB5200423B22 /* AddFixtureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFixtureView.swift; sourceTree = "<group>"; };
 		8B6FB08E2BC081A300C66C05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8B6FB0902BC084EC00C66C05 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		8B6FB0922BC0921700C66C05 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				8B4EF2682BC8566800494ED8 /* ManageFixturesView.swift */,
+				8B6644802BCEDB5200423B22 /* AddFixtureView.swift */,
 				8B6644782BCC6CBB00423B22 /* AddEditFixtureView.swift */,
 				8B66447A2BCC6CDD00423B22 /* FixtureRowView.swift */,
 				8B4EF26A2BC857A800494ED8 /* ManageTeamsView.swift */,
@@ -397,6 +400,7 @@
 				8B4EF2542BC45B1C00494ED8 /* TabTableView.swift in Sources */,
 				8B6FB0982BC0B2CA00C66C05 /* AddTeamView.swift in Sources */,
 				8BEEDB972BC04FBA0007703F /* RegistrationView.swift in Sources */,
+				8B6644812BCEDB5300423B22 /* AddFixtureView.swift in Sources */,
 				8BEEDB9B2BC0540D0007703F /* SettingsRowView.swift in Sources */,
 				8B6FB08F2BC081A300C66C05 /* AppDelegate.swift in Sources */,
 				8B4EF2582BC45E4800494ED8 /* TournamentViewModel.swift in Sources */,
