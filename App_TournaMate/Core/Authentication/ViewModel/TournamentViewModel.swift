@@ -119,12 +119,27 @@ class TournamentViewModel: ObservableObject {
                     completion(false)
                 } else {
                     self.updateAllRecords(tournamentCode: uniqueID, teamID: teamID) { success in
-                        completion(success)
+                        if success {
+                            // Updating the user's tournaments array
+                            self.db.collection("users").document(userEmail).updateData([
+                                "tournaments": FieldValue.arrayUnion([uniqueID])
+                            ]) { error in
+                                if let error = error {
+                                    print("Error updating user's tournaments: \(error.localizedDescription)")
+                                    completion(false)
+                                } else {
+                                    completion(true)
+                                }
+                            }
+                        } else {
+                            completion(false)
+                        }
                     }
                 }
             }
         }
     }
+
     
     func joinTournament(tournamentCode: String, completion: @escaping (Bool, String) -> Void) {
         guard let userEmail = Auth.auth().currentUser?.email else {

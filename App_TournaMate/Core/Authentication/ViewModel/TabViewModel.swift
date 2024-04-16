@@ -32,22 +32,59 @@ class TabViewModel: ObservableObject {
                 print("Error fetching tournament: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
-            
             do {
                 let tournament = try documentSnapshot.data(as: Tournament.self)
                 self.currentTournament = tournament
-                // Once we have the tournament, fetch its fixtures if they exist.
                 if let fixtures = tournament.fixtures {
-                    self.fixtures = fixtures.sorted(by: { $0.date < $1.date })
+                    self.fixtures = fixtures.sorted { $0.date < $1.date }
+                    self.fetchTeamsAndUpdateFixtures()  // Fetch teams and update fixture names
                 } else {
                     self.fixtures = []
                 }
-                self.nextFixture = tournament.nextFixture() // Calculate and set the next fixture
+                self.nextFixture = self.determineNextFixture()  // Update next fixture after fetching teams
             } catch {
                 print("Error decoding tournament: \(error.localizedDescription)")
             }
         }
     }
+
+
+    func fetchTeamsAndUpdateFixtures() {
+        guard let tournamentID = selectedTournamentUniqueID, let fixtures = currentTournament?.fixtures else { return }
+        
+        db.collection("teams").whereField("tournament_id", isEqualTo: tournamentID).getDocuments { [weak self] (querySnapshot, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error getting documents: \(error)")
+                return
+            }
+
+            var teamNameMap = [String: String]()
+            self.teams = querySnapshot?.documents.compactMap { document -> Team? in
+                let team = try? document.data(as: Team.self)
+                if let team = team, let teamID = team.id {
+                    teamNameMap[teamID] = team.name
+                }
+                return team
+            } ?? []
+
+            self.updateFixtureNames(with: teamNameMap)
+        }
+    }
+
+
+    private func updateFixtureNames(with teamNameMap: [String: String]) {
+        for (index, fixture) in fixtures.enumerated() {
+            if let teamAName = teamNameMap[fixture.teamA], let teamBName = teamNameMap[fixture.teamB] {
+                fixtures[index].teamA = teamAName
+                fixtures[index].teamB = teamBName
+            }
+        }
+        nextFixture = determineNextFixture()  // Recalculate next fixture with updated names
+    }
+        private func determineNextFixture() -> Fixture? {
+            return fixtures.first(where: { $0.date > Date() })  // Find the next fixture based on date
+        }
     
     
     // Call this function to check if the logged-in user is an admin
@@ -141,4 +178,63 @@ class TabViewModel: ObservableObject {
         }
     }
 
-}
+    func getCurrentPosition(userEmail: String, completion: @escaping (String) -> Void) {
+            guard let tournamentID = selectedTournamentUniqueID else {
+                completion("N/A") // No tournament selected
+                return
+            }
+            
+            db.collection("teams")
+              .whereField("members", arrayContains: userEmail)
+              .whereField("tournament_id", isEqualTo: tournamentID)
+              .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                    completion("N/A")
+                    return
+                }
+
+                // Find the player's team
+                guard let playerTeam = querySnapshot?.documents.compactMap({ document -> Team? in
+                    return try? document.data(as: Team.self)
+                }).first else {
+                    completion("N/A")
+                    return
+                }
+                
+                // Now fetch all teams in the tournament to calculate the position
+                self.db.collection("teams")
+                  .whereField("tournament_id", isEqualTo: tournamentID)
+                  .getDocuments { (allTeamsSnapshot, allTeamsError) in
+                    if let allTeamsError = allTeamsError {
+                        print("Error getting all teams documents: \(allTeamsError)")
+                        completion("N/A")
+                        return
+                    }
+
+                    let teams = allTeamsSnapshot?.documents.compactMap({ document -> Team? in
+                        return try? document.data(as: Team.self)
+                    }) ?? []
+                    
+                    // Sort teams by points
+                    let sortedTeams = teams.sorted(by: { $0.teamStats.points > $1.teamStats.points })
+
+                    // Find the index (position) of the player's team in the sorted array
+                    if let positionIndex = sortedTeams.firstIndex(where: { $0.id == playerTeam.id }) {
+                        completion("\(self.ordinalNumber(positionIndex + 1))") // "+ 1" because array index starts from 0
+                    } else {
+                        completion("N/A")
+                    }
+                }
+            }
+        }
+        
+        // Helper function to convert number to its ordinal representation
+        private func ordinalNumber(_ number: Int) -> String {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .ordinal
+            return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
+        }
+    }
+

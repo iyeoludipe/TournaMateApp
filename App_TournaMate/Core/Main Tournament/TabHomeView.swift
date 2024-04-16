@@ -1,8 +1,11 @@
 import SwiftUI
+import Firebase
+import FirebaseAuth
 
 // Simplified and corrected TabHomeView
 struct TabHomeView: View {
     @ObservedObject var viewModel: TabViewModel
+    @State private var currentPosition: String = "Calculating..." // Added state variable for current position
 
     var body: some View {
         ScrollView {
@@ -27,8 +30,8 @@ struct TabHomeView: View {
                 
                 Divider().padding(.vertical, 2)
                 
-                // Current Position (Placeholder as is, since no dynamic data fetching for position is set up yet)
-                SectionView(title: "Current Position: 1st", iconName: "flag.fill")
+                // Current Position
+                SectionView(title: "Current Position: \(currentPosition)", iconName: "flag.fill") // Now using currentPosition
                 
                 Divider().padding(.vertical, 2)
                 
@@ -39,16 +42,24 @@ struct TabHomeView: View {
         }
         .navigationBarTitle("Home", displayMode: .inline) // Set the navigation bar title
         .onAppear {
+            // Fetch tournament information
             if let tournamentID = viewModel.selectedTournamentUniqueID {
                 viewModel.getCurrentTournamentInfo(tournamentID: tournamentID)
             } else {
                 print("Tournament ID not set")
             }
+            
+            // Fetch current position
+            if let userEmail = Auth.auth().currentUser?.email {
+                viewModel.getCurrentPosition(userEmail: userEmail) { position in
+                    self.currentPosition = position // Update the current position when fetched
+                }
+            }
         }
     }
 }
 
-// SectionView now only requires title and iconName, removed unnecessary viewModel
+// SectionView remains unchanged
 struct SectionView: View {
     let title: String
     let iconName: String

@@ -30,12 +30,6 @@ struct CreateNewTournamentView: View {
 
                 InputView(text: $tournamentName, title: "Tournament Name", placeholder: "Enter tournament name")
                 
-                Picker("Mode", selection: $tournamentMode) {
-                    ForEach(TournamentMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
                 
                 InputView(text: $defaultLocation, title: "Default Location", placeholder: "Enter default location")
                 

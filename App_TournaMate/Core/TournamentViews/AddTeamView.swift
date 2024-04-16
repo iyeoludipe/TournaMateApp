@@ -54,7 +54,13 @@ struct AddTeamView: View {
         let teamData: [String: Any] = [
             "team_name": teamName,
             "members": [userEmail],
-            "created_at": FieldValue.serverTimestamp()
+            "created_at": FieldValue.serverTimestamp(),
+            "team_stats": [
+                "wins": 0,
+                "losses": 0,
+                "pts": 0,
+                "draws": 0
+            ]
         ]
 
         teamRef.setData(teamData) { error in
@@ -68,11 +74,5 @@ struct AddTeamView: View {
                 }
             }
         }
-    }
-}
-
-struct AddTeamView_Previews: PreviewProvider {
-    static var previews: some View {
-        AddTeamView(teams: .constant([]), isAddTeamViewPresented: .constant(true), onTeamCreated: { _, _ in })
     }
 }
