@@ -27,6 +27,7 @@
 		8B6644792BCC6CBC00423B22 /* AddEditFixtureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6644782BCC6CBB00423B22 /* AddEditFixtureView.swift */; };
 		8B66447B2BCC6CDD00423B22 /* FixtureRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447A2BCC6CDD00423B22 /* FixtureRowView.swift */; };
 		8B66447D2BCD268800423B22 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447C2BCD268800423B22 /* ActivityView.swift */; };
+		8B66447F2BCD93BC00423B22 /* JoinTeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B66447E2BCD93BC00423B22 /* JoinTeamView.swift */; };
 		8B6FB08B2BC0810200C66C05 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6FB08A2BC0810200C66C05 /* FirebaseAppCheck */; };
 		8B6FB08D2BC0810200C66C05 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6FB08C2BC0810200C66C05 /* FirebaseAuthCombine-Community */; };
 		8B6FB08F2BC081A300C66C05 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6FB08E2BC081A300C66C05 /* AppDelegate.swift */; };
@@ -73,6 +74,7 @@
 		8B6644782BCC6CBB00423B22 /* AddEditFixtureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFixtureView.swift; sourceTree = "<group>"; };
 		8B66447A2BCC6CDD00423B22 /* FixtureRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureRowView.swift; sourceTree = "<group>"; };
 		8B66447C2BCD268800423B22 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		8B66447E2BCD93BC00423B22 /* JoinTeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinTeamView.swift; sourceTree = "<group>"; };
 		8B6FB08E2BC081A300C66C05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8B6FB0902BC084EC00C66C05 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		8B6FB0922BC0921700C66C05 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				8B4EF2462BC429A200494ED8 /* MyTournamentsView.swift */,
 				8B4EF2482BC429B700494ED8 /* JoinTournamentView.swift */,
 				8B6FB0992BC0B3BB00C66C05 /* Team.swift */,
+				8B66447E2BCD93BC00423B22 /* JoinTeamView.swift */,
 			);
 			path = TournamentViews;
 			sourceTree = "<group>";
@@ -369,6 +372,7 @@
 				8B4EF26B2BC857A800494ED8 /* ManageTeamsView.swift in Sources */,
 				8B4EF25C2BC5885600494ED8 /* RootViewModel.swift in Sources */,
 				8B6644792BCC6CBC00423B22 /* AddEditFixtureView.swift in Sources */,
+				8B66447F2BCD93BC00423B22 /* JoinTeamView.swift in Sources */,
 				8BEEDB952BC04B2E0007703F /* InputView.swift in Sources */,
 				8B66447B2BCC6CDD00423B22 /* FixtureRowView.swift in Sources */,
 				8B4EF2472BC429A200494ED8 /* MyTournamentsView.swift in Sources */,

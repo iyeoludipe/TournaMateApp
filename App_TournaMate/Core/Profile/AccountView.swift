@@ -4,10 +4,14 @@ struct AccountView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.dismiss) var dismiss
-    
+
     // State for controlling navigation
     @State private var navigateToForgotPassword = false
-    
+
+    // State for showing alert
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+
     var body: some View {
         NavigationView {
             VStack {
@@ -48,13 +52,21 @@ struct AccountView: View {
                         if success {
                             presentationMode.wrappedValue.dismiss()  // Dismiss view if account is deleted
                         } else {
-                            print(message)  // Handle error
+                            alertMessage = message  // Set the error message
+                            showAlert = true  // Show alert on error
                         }
                     }
                 }) {
                     Text("Delete Account").foregroundColor(.red)
                 }
                 .padding()
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Error"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
 
                 // Close button
                 Button("Close") {

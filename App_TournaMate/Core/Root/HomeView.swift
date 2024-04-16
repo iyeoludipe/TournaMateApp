@@ -2,8 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var isAccountViewPresented = false
-    @State private var showingCreateTournamentView = false
-    @EnvironmentObject var tabViewModdel: TabViewModel
+    @ObservedObject var tournamentViewModel = TournamentViewModel()
 
     var body: some View {
         VStack {
@@ -26,13 +25,19 @@ struct HomeView: View {
                 NavigationLink(destination: CreateNewTournamentView()) {
                     HomeButtonView(title: "CREATE NEW TOURNAMENT", color: .green)
                 }
+
+                // Change this button to a NavigationLink
+                NavigationLink(destination: JoinTeamView(viewModel: TournamentViewModel())) {
+                    Text("New Player? Join Your Team")
+                        .foregroundColor(.blue)
+                        .underline()
+                }
             }
             .padding(.horizontal)
 
             Spacer()
         }
         .navigationBarTitle("TournaMate", displayMode: .inline)
-        // Ensure no sign out button is added
         .navigationBarItems(trailing: Button(action: {
             isAccountViewPresented.toggle()
         }) {

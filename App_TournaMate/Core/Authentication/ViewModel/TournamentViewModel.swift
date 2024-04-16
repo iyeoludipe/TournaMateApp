@@ -164,4 +164,69 @@ class TournamentViewModel: ObservableObject {
             }
         }
     }
-}
+    func newJoinTeam(teamCode: String, completion: @escaping (Bool, String) -> Void) {
+        guard let userEmail = Auth.auth().currentUser?.email else {
+            completion(false, "User not logged in")
+            return
+        }
+
+        let teamRef = db.collection("teams").document(teamCode)
+        teamRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                // Team exists, proceed with adding user to team
+                teamRef.updateData([
+                    "members": FieldValue.arrayUnion([userEmail])
+                ]) { error in
+                    if let error = error {
+                        completion(false, "Failed to join team: \(error.localizedDescription)")
+                        return
+                    }
+                    // Add team code to user's 'teams_joined' array
+                    self.db.collection("users").document(userEmail).updateData([
+                        "teams_joined": FieldValue.arrayUnion([teamCode])
+                    ]) { error in
+                        if let error = error {
+                            completion(false, "Failed to update user's teams: \(error.localizedDescription)")
+                        } else {
+                            completion(true, "Successfully joined the team!")
+                        }
+                    }
+                }
+            } else {
+                completion(false, "No such team found. Please check the team code.")
+            }
+        }
+    }
+
+    
+    func joinTeam(teamCode: String, userEmail: String, completion: @escaping (Bool, String) -> Void) {
+            let teamRef = db.collection("teams").document(teamCode)
+
+            // Check if team exists
+            teamRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    // Team exists, proceed with adding user to team
+                    teamRef.updateData([
+                        "members": FieldValue.arrayUnion([userEmail])
+                    ]) { error in
+                        if let error = error {
+                            completion(false, "Failed to join team: \(error.localizedDescription)")
+                            return
+                        }
+                        // Add team code to user's 'teams_joined' array
+                        self.db.collection("users").document(userEmail).updateData([
+                            "teams_joined": FieldValue.arrayUnion([teamCode])
+                        ]) { error in
+                            if let error = error {
+                                completion(false, "Failed to update user's teams: \(error.localizedDescription)")
+                            } else {
+                                completion(true, "Successfully joined the team!")
+                            }
+                        }
+                    }
+                } else {
+                    completion(false, "No such team found. Please check the team code.")
+                }
+            }
+        }
+    }

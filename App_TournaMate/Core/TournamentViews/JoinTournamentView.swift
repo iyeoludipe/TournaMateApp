@@ -36,9 +36,3 @@ struct JoinTournamentView: View {
         .navigationBarTitle("Join Tournament", displayMode: .inline)
     }
 }
-
-struct JoinTournamentView_Previews: PreviewProvider {
-    static var previews: some View {
-        JoinTournamentView()
-    }
-}
